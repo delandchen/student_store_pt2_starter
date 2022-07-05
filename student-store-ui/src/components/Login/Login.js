@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import axios from "axios"
 import "./Login.css"
+import ApiClient from "../../services/ApiClient"
 
 export default function Login({ user, setUser }) {
   const navigate = useNavigate()
@@ -37,7 +38,8 @@ export default function Login({ user, setUser }) {
     setErrors((e) => ({ ...e, form: null }))
 
     try {
-      const res = await axios.post("http://localhost:3001/auth/login", form)
+      const res = await ApiClient.loginUser(form)
+      ApiClient.setToken(res?.data?.token)
       if (res?.data?.user) {
         setUser(res.data.user)
       } else {

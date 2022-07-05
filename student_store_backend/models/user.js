@@ -34,7 +34,7 @@ class User {
   }
 
   static async register(credentials) {
-    const requiredFields = ["email", "password", "username", "isAdmin"]
+    const requiredFields = ["email", "password", "name", "isAdmin"]
     requiredFields.forEach((property) => {
       if (!credentials.hasOwnProperty(property)) {
         throw new BadRequestError(`Missing ${property} in request body.`)
@@ -50,20 +50,20 @@ class User {
       throw new BadRequestError(`A user already exists with email: ${credentials.email}`)
     }
 
-    const existingUserWithUsername = await User.fetchUserByUsername(credentials.username)
+    const existingUserWithUsername = await User.fetchUserByUsername(credentials.name)
     if (existingUserWithUsername) {
-      throw new BadRequestError(`A user already exists with username: ${credentials.username}`)
+      throw new BadRequestError(`A user already exists with name: ${credentials.name}`)
     }
 
     const hashedPassword = await bcrypt.hash(credentials.password, BCRYPT_WORK_FACTOR)
     const normalizedEmail = credentials.email.toLowerCase()
 
     const userResult = await db.query(
-      `INSERT INTO users (email, password, username, is_admin)
+      `INSERT INTO users (email, password, name, is_admin)
        VALUES ($1, $2, $3, $4)
-       RETURNING id, email, username, is_admin, created_at;
+       RETURNING id, email, name, is_admin, created_at;
       `,
-      [normalizedEmail, hashedPassword, credentials.username, credentials.isAdmin]
+      [normalizedEmail, hashedPassword, credentials.name, credentials.isAdmin]
     )
     const user = userResult.rows[0]
 

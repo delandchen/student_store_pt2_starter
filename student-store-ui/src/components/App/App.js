@@ -9,6 +9,7 @@ import NotFound from "../NotFound/NotFound"
 import ShoppingCart from "../ShoppingCart/ShoppingCart"
 import { removeFromCart, addToCart, getQuantityOfItemInCart, getTotalItemsInCart } from "../../utils/cart"
 import "./App.css"
+import ApiClient from "../../services/ApiClient"
 
 export default function App() {
   const [activeCategory, setActiveCategory] = useState("All Categories")
@@ -34,7 +35,7 @@ export default function App() {
     setIsCheckingOut(true)
 
     try {
-      const res = await axios.post("http://localhost:3001/orders", { order: cart })
+      const res = await ApiClient.createOrder({ order: cart })
       if (res?.data?.order) {
         setOrders((o) => [...res.data.order, ...o])
         setIsCheckingOut(false)
@@ -59,6 +60,7 @@ export default function App() {
       try {
         const res = await axios.get("http://localhost:3001/store")
         if (res?.data?.products) {
+          console.log(res.data.products);
           setProducts(res.data.products)
         } else {
           setError("Error fetching products.")
@@ -69,6 +71,14 @@ export default function App() {
         setError(message ?? String(err))
       } finally {
         setIsFetching(false)
+      }
+
+      try {
+        const response = await ApiClient.fetchUserFromToken();
+        setUser(response?.data?.user);
+      }
+      catch(err) {
+        console.error(err);
       }
     }
 
